@@ -11,11 +11,13 @@ namespace Database
 {
     public class ConnectionProvider
     {
-        string connectionString = "Server=myServerAddress;Database=fhv_chat;Uid=fhv_chat_user;Pwd=thi5i5incredibly5ecure";
+        string connectionString = "Server=dbsrv.inteo.at;Database=fhv_chat;Uid=fhv_chat_user;Pwd=thi5i5incredibly5ecure";
 
         public IDbConnection getConnection()
         {
-            return new SqlConnection(connectionString);
+            SqlConnection connection = new SqlConnection(connectionString);
+            connection.Open();
+            return connection;
         }
     }
 }

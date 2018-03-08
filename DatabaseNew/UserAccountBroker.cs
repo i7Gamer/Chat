@@ -1,4 +1,5 @@
-﻿using Model;
+﻿using DatabaseNew;
+using Model;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Database
 {
-    class UserAccountBroker
+    public class UserAccountBroker
     {
         ConnectionProvider provider;
         public UserAccountBroker(ConnectionProvider provider)
@@ -24,6 +25,9 @@ namespace Database
                 using (IDbCommand command = connection.CreateCommand())
                 {
                     command.CommandText = "SELECT * FROM useraccount WHERE username = ?username AND password = ?password";
+                    command.AddParameter("username", DbType.String, username);
+                    command.AddParameter("password", DbType.String, password);
+
                     IDataReader reader = command.ExecuteReader();
                     if (reader.Read())
                     {
@@ -37,7 +41,7 @@ namespace Database
                     }
                     else
                     {
-                        return null;
+                        throw new Exception("Username or password did not match");
                     }
                 }
             }
