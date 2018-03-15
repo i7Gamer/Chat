@@ -15,7 +15,7 @@ namespace Test
             try
             {
                 ConnectionProvider provider = new ConnectionProvider();
-                UserAccountBroker broker = new UserAccountBroker(provider);
+                UserRepository broker = new UserRepository(provider);
                 User user = broker.getUser("test","test");
                 if(user != null)
                 {
