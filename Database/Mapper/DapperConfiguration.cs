@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DatabaseNew
+namespace Database
 {
     public static class DapperConfiguration
     {
@@ -20,6 +20,8 @@ namespace DatabaseNew
             FluentMapper.Initialize(config =>
             {
                 config.AddMap(new UserMapper());
+                config.AddMap(new ChatMapper());
+                config.AddMap(new ChatMemberMapper());
             });
         }
     }

@@ -1,4 +1,4 @@
-﻿using DatabaseNew;
+﻿using Database;
 using Dapper;
 using Model;
 using System;
@@ -14,9 +14,9 @@ namespace Database
     public class UserRepository
     {
         string id = "useraccount_id";
-        string userName = "useraccount_username";
+        string username = "useraccount_username";
         string password = "useraccount_password";
-        string fistName = "useraccount_firstname";
+        string firstName = "useraccount_firstname";
         string lastName = "useraccount_lastname";
 
         ConnectionProvider provider;
@@ -27,13 +27,19 @@ namespace Database
 
         public User login(IDbConnection connection, string username, string password)
         {
-            return connection.Query<User>("SELECT * FROM useraccount WHERE "+username+" = @username AND "+password+" = @password",
+            return connection.Query<User>("SELECT * FROM useraccount WHERE "+this.username+" = @username AND "+ this.password +" = @password",
             new { username = username, password = password }).FirstOrDefault();
+        }
+
+        public User logout(IDbConnection connection, string username)
+        {
+            return connection.Query<User>("SELECT * FROM useraccount WHERE " + this.username + " = @username",
+            new { username = username }).FirstOrDefault();
         }
 
         public User getUser(IDbConnection connection, string id)
         {
-            return connection.Query<User>("SELECT * FROM useraccount WHERE "+id+" = @id", new {id = id}).FirstOrDefault();
+            return connection.Query<User>("SELECT * FROM useraccount WHERE "+ this.id +" = @id", new {id = id}).FirstOrDefault();
         }
 
         public List<User> getUsers(IDbConnection connection)
@@ -43,7 +49,7 @@ namespace Database
 
         public User createUser(IDbConnection connection, string username, string password, string firstName, string lastName)
         {
-            return connection.Query<User>("INSERT INTO useraccount ("+username+", "+password+", "+firstName+", "+lastName+
+            return connection.Query<User>("INSERT INTO useraccount ("+ this.username +", "+ this.password +", "+ this.firstName +", "+ this.lastName +
                 ") VALUES(@username, @password, @firstName, @lastName)", 
                 new {username = username, password = password, firstName = firstName, lastName = lastName}).FirstOrDefault();
         }

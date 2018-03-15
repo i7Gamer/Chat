@@ -16,12 +16,12 @@ namespace Test
             {
                 ConnectionProvider provider = new ConnectionProvider();
                 UserRepository broker = new UserRepository(provider);
-                User user = broker.getUser("test","test");
+                User user = broker.getUser(provider.getConnection(), "1");
                 if(user != null)
                 {
                     Console.WriteLine(user.firstName);
                     Console.WriteLine(user.lastName);
-                    Console.WriteLine(user.userName);
+                    Console.WriteLine(user.username);
                     Console.WriteLine(user.password);
                 }
             }

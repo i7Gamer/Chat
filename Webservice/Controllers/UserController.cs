@@ -14,7 +14,6 @@ namespace Webservice.Controllers
         UserRepository userRepository = new UserRepository(provider);
 
         [HttpGet]
-        [ActionName("getUser")]
         public IHttpActionResult getUser(string id)
         {
             using(IDbConnection connection = provider.getConnection())
@@ -40,6 +39,32 @@ namespace Webservice.Controllers
             }
         }
 
+        [HttpGet]
+        public IHttpActionResult getUsers()
+        {
+            using (IDbConnection connection = provider.getConnection())
+            {
+                List<User> users;
+                try
+                {
+                    users = userRepository.getUsers(connection);
+                }
+                catch
+                {
+                    return BadRequest();
+                }
+
+                if (users == null)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    return Ok(users);
+                }
+            }
+        }
+
         [HttpPost]
         [ActionName("register")]
         public IHttpActionResult register(string username, string password, string firstName, string lastName)
@@ -61,18 +86,56 @@ namespace Webservice.Controllers
 
         [HttpPost]
         [ActionName("login")]
-        public IHttpActionResult login(string username, string password)
+        public IHttpActionResult login([FromBody] User user)
         {
-            //TODO
-            return Ok();
+            using (IDbConnection connection = provider.getConnection())
+            {
+                User loggedInUser;
+                try
+                {
+                    loggedInUser = userRepository.login(connection, user.username, user.password);
+                }
+                catch
+                {
+                    return BadRequest();
+                }
+
+                if (loggedInUser == null)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    return Ok(loggedInUser);
+                }
+            }
         }
 
         [HttpPost]
         [ActionName("logout")]
         public IHttpActionResult logout(string username)
         {
-            //TODO
-            return Ok();
+            using (IDbConnection connection = provider.getConnection())
+            {
+                User loggedOutUser;
+                try
+                {
+                    loggedOutUser = userRepository.logout(connection, username);
+                }
+                catch
+                {
+                    return BadRequest();
+                }
+
+                if (loggedOutUser == null)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    return Ok(loggedOutUser);
+                }
+            }
         }
     }
 }
