@@ -24,7 +24,7 @@ namespace Database
             {
                 using (IDbCommand command = connection.CreateCommand())
                 {
-                    command.CommandText = "SELECT * FROM useraccount WHERE username = ?username AND password = ?password";
+                    command.CommandText = "SELECT * FROM useraccount WHERE useraccount_username = ?username AND useraccount_password = ?password";
                     command.AddParameter("username", DbType.String, username);
                     command.AddParameter("password", DbType.String, password);
 
@@ -32,11 +32,11 @@ namespace Database
                     if (reader.Read())
                     {
                         User user = new User();
-                        user.id = (int)reader["id"];
-                        user.firstName = (string)reader["firstname"];
-                        user.lastName = (string)reader["lastname"];
-                        user.userName = (string)reader["username"];
-                        user.password = (string)reader["password"];
+                        user.id = (int)reader["useraccount_id"];
+                        user.firstName = (string)reader["useraccount_firstname"];
+                        user.lastName = (string)reader["useraccount_lastname"];
+                        user.userName = (string)reader["useraccount_username"];
+                        user.password = (string)reader["useraccount_password"];
                         return user;
                     }
                     else

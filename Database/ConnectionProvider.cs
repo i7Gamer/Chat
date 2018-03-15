@@ -6,16 +6,17 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Data;
 using System.Data.SqlClient;
+using MySql.Data.MySqlClient;
 
 namespace Database
 {
     public class ConnectionProvider
     {
-        string connectionString = "Server=dbsrv.inteo.at;Database=fhv_chat;Uid=fhv_chat_user;Pwd=thi5i5incredibly5ecure";
+        string connectionString = "Server=dbsrv.infeo.at;Database=fhv_chat;Uid=fhv_chat_user;Pwd=test;SslMode=None";
 
         public IDbConnection getConnection()
         {
-            SqlConnection connection = new SqlConnection(connectionString);
+            IDbConnection connection = new MySqlConnection(connectionString);
             connection.Open();
             return connection;
         }

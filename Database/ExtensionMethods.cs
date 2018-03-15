@@ -15,6 +15,7 @@ namespace DatabaseNew
             parameter.DbType = dbType;
             parameter.ParameterName = parameterName;
             parameter.Value = value;
+            command.Parameters.Add(parameter);
             return parameter;
         }
     }

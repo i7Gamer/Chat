@@ -8,7 +8,7 @@ namespace Model
 {
     public class Group
     {
-        List<User> members { get; }
+        List<string> members { get; }
         object image { get; set; }
     }
 }

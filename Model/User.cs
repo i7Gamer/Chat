@@ -18,10 +18,10 @@ namespace Model
         public string email { get; set; }
         public string firstName {get; set;}
         public string lastName { get; set; }
-        public List<User> contacts { get; set; }
-        public List<Group> groups { get; set; }
+        public List<string> contacts { get; set; }
+        public List<string> groups { get; set; }
         public string status { get; set; }
-        public List<User> blockedUsers { get; set; }
+        public List<string> blockedUsers { get; set; }
         public object picture { get; set; }
     }
 }

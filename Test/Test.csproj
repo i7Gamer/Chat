@@ -50,11 +50,11 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DatabaseNew\Database.csproj">
+    <ProjectReference Include="..\Database\Database.csproj">
       <Project>{9644f682-2ff6-43db-8694-d669d1710a0d}</Project>
       <Name>Database</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ModelNew\Model.csproj">
+    <ProjectReference Include="..\Model\Model.csproj">
       <Project>{cb113baf-b7d2-499c-b470-cb9d9fcfaef0}</Project>
       <Name>Model</Name>
     </ProjectReference>
