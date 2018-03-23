@@ -76,9 +76,9 @@ namespace Webservice.Controllers
                 {
                     user = userRepository.createUser(connection, username, password, firstName, lastName);
                 }
-                catch
+                catch (Exception e)
                 {
-                    return BadRequest();
+                    return BadRequest(e.ToString());
                 }
                  return Ok(user);
             }
