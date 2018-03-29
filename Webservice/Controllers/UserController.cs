@@ -14,6 +14,7 @@ namespace Webservice.Controllers
         UserRepository userRepository = new UserRepository(provider);
 
         [HttpGet]
+        [ActionName("getUser")]
         public IHttpActionResult getUser(string id)
         {
             using(IDbConnection connection = provider.getConnection())
@@ -40,6 +41,7 @@ namespace Webservice.Controllers
         }
 
         [HttpGet]
+        [ActionName("getUsers")]
         public IHttpActionResult getUsers()
         {
             using (IDbConnection connection = provider.getConnection())
@@ -62,6 +64,25 @@ namespace Webservice.Controllers
                 {
                     return Ok(users);
                 }
+            }
+        }
+
+        [HttpGet]
+        [ActionName("getContacts")]
+        public IHttpActionResult getContacts(string id)
+        {
+            using (IDbConnection connection = provider.getConnection())
+            {
+                List<User> users;
+                try
+                {
+                    users = userRepository.getContacts(connection, id);
+                }
+                catch (Exception e)
+                {
+                    return BadRequest(e.ToString());
+                }
+                return Ok(users);
             }
         }
 

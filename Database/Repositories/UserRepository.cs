@@ -19,6 +19,10 @@ namespace Database
         string firstName = "useraccount_firstname";
         string lastName = "useraccount_lastname";
 
+        // contacts
+        string userId = "contact_lists_useraccount_id";
+        string ownerId = "contact_lists_useraccount_owner";
+
         ConnectionProvider provider;
         public UserRepository(ConnectionProvider provider)
         {
@@ -40,6 +44,12 @@ namespace Database
         public User getUser(IDbConnection connection, string id)
         {
             return connection.Query<User>("SELECT * FROM useraccount WHERE "+ this.id +" = @id", new {id = id}).FirstOrDefault();
+        }
+
+
+        public List<User> getContacts(IDbConnection connection, string userId)
+        {
+            return connection.Query<User>("SELECT * FROM contact_lists INNER JOIN useraccount ON " + this.userId + " = useraccount.useraccount_id WHERE " + ownerId + " = " + userId).ToList();
         }
 
         public List<User> getUsers(IDbConnection connection)

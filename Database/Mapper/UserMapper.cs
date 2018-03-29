@@ -17,6 +17,7 @@ namespace Database
             Map(x => x.lastName).ToColumn("useraccount_lastname");
             Map(x => x.username).ToColumn("useraccount_username");
             Map(x => x.password).ToColumn("useraccount_password");
+            Map(x => x.status).ToColumn("useraccount_statusmessage");
         }
     }
 }

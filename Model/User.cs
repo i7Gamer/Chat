@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 
 namespace Model
 {
@@ -19,5 +20,6 @@ namespace Model
         public string status { get; set; }
         public List<string> blockedUsers { get; set; }
         public object picture { get; set; }
+        public BitmapImage image { get; set; }
     }
 }
