@@ -12,6 +12,7 @@ namespace Database
     {
         public ChatMessageMapper()
         {
+            Map(x => x.id).ToColumn("chat_messages_id");
             Map(x => x.chatId).ToColumn("chat_messages_chat_id");
             Map(x => x.message).ToColumn("chat_messages_message");
             Map(x => x.senderId).ToColumn("chat_messages_sender_id");

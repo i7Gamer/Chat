@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Resources;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,6 +20,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
+using System.ComponentModel;
 
 namespace ChatClient
 {
@@ -34,10 +37,23 @@ namespace ChatClient
         bool currentChatCreated = false;
 
         List<Chat> allChats;
+        DateTime lastCheckedForMessages = DateTime.Now;
+
+        List<Thread> threads = new List<Thread>();
 
         public MainWindow()
         {
             InitializeComponent();
+            Closing += closeThreads();
+        }
+
+        private CancelEventHandler closeThreads()
+        {
+            foreach(Thread t in threads)
+            {
+                t.Abort();
+            }
+            return null;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -85,10 +101,92 @@ namespace ChatClient
 
                 var allChatsResponse = client.Execute<List<Chat>>(request);
                 allChats = allChatsResponse.Data;
+                
+                foreach(Chat c in allChats)
+                {
+                    client = new RestClient(restURL + "chat/getChatMembers");
+                    request = new RestRequest();
+                    request.AddParameter("id", c.id);
+
+                    var chatMemberResponse = client.Execute<List<User>>(request);
+                    c.members = chatMemberResponse.Data;
+                }
             }
             else
             {
                 Close();
+            }
+
+
+
+            Thread backgroundThread = new Thread(() =>
+            {
+                Thread.CurrentThread.IsBackground = true;
+
+                while (true)
+                {
+                    Thread.Sleep(5000);
+                    try
+                    {
+                        DateTime temp = DateTime.Now;
+                        // check for new messages
+                        foreach (Chat c in allChats)
+                        {
+                            // get new messages
+                            var client = new RestClient(restURL + "chat/getNewChatMessages");
+                            var request = new RestRequest();
+                            request.AddParameter("chatId", c.id);
+                            request.AddParameter("timestamp", lastCheckedForMessages.ToString("yyyy-MM-dd HH:mm:ss"));
+                            var response2 = client.Execute<List<ChatMessage>>(request);
+                            List<ChatMessage> messages = response2.Data;
+
+                            // if new messages add them and raise event
+                            if (messages.Count > 0)
+                            {
+                                Action newAction = () => newMessages(c, messages);
+                                Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Background, newAction);
+                            }
+                        }
+                        lastCheckedForMessages = temp;
+                    }
+                    catch(Exception ex)
+                    {
+                        Console.Write(ex.ToString());
+                    }
+                }
+            });
+
+            threads.Add(backgroundThread);
+            backgroundThread.Start();
+        }
+
+        public void newMessages(Chat c, List<ChatMessage> newMessages)
+        {
+            // insert chat messages if current chat has new message
+            if (c.id == currentChat.id)
+            {
+                foreach (ChatMessage msg in newMessages)
+                {
+                    if (currentChat.messages == null)
+                    {
+                        currentChat.messages = new List<ChatMessage>();
+                    }
+                    else if(currentChat.messages.FindAll(m => m.id == msg.id).Count > 0 || msg.senderId == loggedInUser.id)
+                    {
+                        return;
+                    }
+                    User currentUser;
+                    if (msg.senderId == currentlySelectedUser.id)
+                    {
+                        currentUser = currentlySelectedUser;
+                    }
+                    else
+                    {
+                        currentUser = loggedInUser;
+                    }
+                    currentChat.messages.Add(msg);
+                    chatList.Items.Add(currentUser.username + ": " + msg.message);
+                }
             }
         }
 
@@ -123,12 +221,10 @@ namespace ChatClient
 
             // TODO show chat if already exists
             // find chat
-            var client = new RestClient(restURL + "chat/getChat");
-            RestRequest request = new RestRequest();
-            request.AddParameter("userIdOne", currentlySelectedUser.id);
-            request.AddParameter("userIdTwo", loggedInUser.id);
-            var response1 = client.Execute<Chat>(request);
-            currentChat = response1.Data;
+
+            currentChat = allChats.Find(c => c.members.Count == 2 
+                && c.members.FindAll(m => m.id == loggedInUser.id).Count == 1 
+                && c.members.FindAll(m => m.id == currentlySelectedUser.id).Count == 1);
             
             if (currentChat == null)
             {
@@ -139,11 +235,16 @@ namespace ChatClient
             currentChatCreated = true;
 
             // get chat messages
-            client = new RestClient(restURL + "chat/getChatMessages");
-            request = new RestRequest();
+            var client = new RestClient(restURL + "chat/getChatMessages");
+            var request = new RestRequest();
             request.AddParameter("chatId", currentChat.id);
             var response2 = client.Execute<List<ChatMessage>>(request);
             List<ChatMessage> messages = response2.Data;
+
+            if (currentChat.messages == null)
+            {
+                currentChat.messages = new List<ChatMessage>();
+            }
 
             // insert chat messages
             foreach (ChatMessage msg in messages)
@@ -158,6 +259,7 @@ namespace ChatClient
                     currentUser = loggedInUser;
                 }
                 chatList.Items.Add(currentUser.username + ": " + msg.message);
+                currentChat.messages.Add(msg);
             }
         }
         
@@ -201,8 +303,14 @@ namespace ChatClient
                 cm.chatId = currentChat.id;
                 cm.message = message;
                 cm.senderId = loggedInUser.id;
-                cm.timestamp = DateTime.UtcNow;
+                cm.timestamp = DateTime.Now;
 
+                if(currentChat.messages == null)
+                {
+                    currentChat.messages = new List<ChatMessage>();
+                }
+                currentChat.messages.Add(cm);
+                
                 // save message
                 string body = "{ \"chatId\":\"" + cm.chatId + "\" , \"message\":\"" + cm.message + "\", \"senderId\":\"" 
                     + cm.senderId + "\" , \"timestamp\":\"" + cm.timestamp + "\"}";
@@ -215,7 +323,6 @@ namespace ChatClient
                 request.AddParameter("application/json", body, ParameterType.RequestBody);
 
                 var response = client.Execute<Chat>(request);
-                currentChat = response.Data;
 
                 // empty textbox
                 textBox.Text = "";

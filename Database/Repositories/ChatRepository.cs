@@ -26,6 +26,12 @@ namespace Database
             new { chatId = chatId }).ToList();
         }
 
+        public List<ChatMessage> getChatMessages(IDbConnection connection, string chatId, string timestamp)
+        {
+            return connection.Query<ChatMessage>("SELECT * FROM chat_messages WHERE " + this.chatId + " = @chatId AND chat_messages_timestamp >= @timestamp",
+            new { chatId = chatId, timestamp = timestamp}).ToList();
+        }
+
         public Chat getChat(IDbConnection connection, string userIdOne, string userIdTwo)
         {
             return connection.Query<Chat>("SELECT chat.chat_id, chat.chat_title FROM fhv_chat.chat " +
@@ -46,7 +52,7 @@ namespace Database
         {
             return connection.Query<User>("SELECT useraccount.* FROM chat_member " +
                 "INNER JOIN useraccount ON chat_member_user_id = useraccount_id " +
-                "WHERE " + chatMemberId + " = @id;",
+                "WHERE chat_member_chat_id = @id;",
             new { id = id }).ToList();
         }
 
@@ -73,12 +79,10 @@ namespace Database
         public ChatMessage saveMessage(IDbConnection connection, int chatId, int senderId, string message, DateTime timestamp)
         {
             string query = "INSERT INTO chat_messages (chat_messages_chat_id, chat_messages_message, chat_messages_sender_id, " +
-                "chat_messages_timestamp) VALUES (" + chatId + ", " + message + "," + senderId + ","
-                + (timestamp.Subtract(new DateTime(1970, 1, 1))).TotalSeconds + ")";
+                "chat_messages_timestamp) VALUES (" + chatId + ",\"" + message + "\"," + senderId + ",'"
+                + timestamp.ToString("yyyy-MM-dd HH:mm:ss") + "')";
 
-            return connection.Query<ChatMessage>("INSERT INTO chat_messages (chat_messages_chat_id, chat_messages_message, chat_messages_sender_id, "+
-                "chat_messages_timestamp) VALUES (" + chatId + ", \"" + message + "\", " + senderId+","
-                + (timestamp.Subtract(new DateTime(1970, 1, 1))).TotalSeconds + ")").FirstOrDefault();
+            return connection.Query<ChatMessage>(query).FirstOrDefault();
         }
     }
 }

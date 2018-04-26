@@ -10,5 +10,7 @@ namespace Model
     {
         public int id { get; set; }
         public string title { get; set; }
+        public List<User> members { get; set; }
+        public List<ChatMessage> messages { get; set; }
     }
 }

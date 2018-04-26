@@ -41,6 +41,33 @@ namespace Webservice.Controllers
         }
 
         [HttpGet]
+        [ActionName("getNewChatMessages")]
+        public IHttpActionResult getNewChatMessages(string chatId, string timestamp)
+        {
+            using (IDbConnection connection = provider.getConnection())
+            {
+                List<ChatMessage> messages;
+                try
+                {
+                    messages = chatRepository.getChatMessages(connection, chatId, timestamp);
+                }
+                catch (Exception e)
+                {
+                    return BadRequest(e.ToString());
+                }
+
+                if (messages == null)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    return Ok(messages);
+                }
+            }
+        }
+
+        [HttpGet]
         [ActionName("getChat")]
         public IHttpActionResult getChat(string userIdOne, string userIdTwo)
         {
@@ -158,7 +185,7 @@ namespace Webservice.Controllers
                 ChatMessage newMessage;
                 try
                 {
-                    newMessage = chatRepository.saveMessage(connection, message.chatId, message.senderId, message.message, message.timestamp);
+                    newMessage = chatRepository.saveMessage(connection, message.chatId, message.senderId, message.message, DateTime.Now);
                 }
                 catch (Exception e)
                 {

@@ -8,6 +8,7 @@ namespace Model
 {
     public class ChatMessage
     {
+        public int id { get; set; }
         public int chatId { get; set; }
         public string message { get; set; }
         public int senderId { get; set; }
