@@ -18,6 +18,7 @@ namespace Database
             Map(x => x.username).ToColumn("useraccount_username");
             Map(x => x.password).ToColumn("useraccount_password");
             Map(x => x.status).ToColumn("useraccount_statusmessage");
+            Map(x => x.picture).ToColumn("useraccount_usericon");
         }
     }
 }

@@ -14,7 +14,6 @@ namespace Database
         {
             Map(x => x.id).ToColumn("chat_id");
             Map(x => x.title).ToColumn("chat_title");
-            Map(x => x.host).ToColumn("chat_host");
         }
     }
 }

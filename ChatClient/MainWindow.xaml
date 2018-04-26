@@ -15,21 +15,36 @@
             <RowDefinition/>
             <RowDefinition Height="10"/>
         </Grid.RowDefinitions>
-        <ListView x:Name="userList" Grid.ColumnSpan="1" SelectionChanged="userListSelectionChanged" HorizontalAlignment="Stretch" VerticalAlignment="Top">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <UniformGrid Columns="1" HorizontalAlignment="Stretch"/>
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                        <Image Source="{Binding image}" Stretch="UniformToFill" Height="30" Margin="0,0,5,0"/>
-                        <TextBlock Text="{Binding username}" VerticalAlignment="Center"/>
-                    </StackPanel>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+
+        <Grid Grid.Column="0" Grid.ColumnSpan="1" ShowGridLines="True">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="5,0,0,0">
+                <Image x:Name="loggedInUserImage" Stretch="UniformToFill" Height="30" Margin="0,0,5,0"/>
+                <TextBlock x:Name="loggedInUserName" VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <ListView x:Name="userList" Grid.Row="1" Grid.Column="0" SelectionChanged="userListSelectionChanged" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="1" HorizontalAlignment="Stretch"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Height="30" Orientation="Horizontal" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Image Source="{Binding image}" Stretch="UniformToFill" Height="30" Margin="0,0,5,0"/>
+                            <TextBlock Text="{Binding username}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
         <Grid Grid.Column="1" Grid.ColumnSpan="1" ShowGridLines="True">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
@@ -45,7 +60,7 @@
                 <TextBlock x:Name="userstatus" Text="status" VerticalAlignment="Center"/>
             </StackPanel>
 
-            <ListView x:Name="chatList" Grid.ColumnSpan="1" Grid.RowSpan="1" Grid.Row="2" Grid.Column="1"/>
+            <ListView x:Name="chatList" Grid.ColumnSpan="1" Grid.RowSpan="1" Grid.Row="1" Grid.Column="1"/>
             <TextBox Grid.Row="2" KeyDown="onKeyDownChat"></TextBox>
         </Grid>
     </Grid>

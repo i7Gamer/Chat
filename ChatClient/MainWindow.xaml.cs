@@ -28,7 +28,13 @@ namespace ChatClient
     public partial class MainWindow : Window
     {
         public static string restURL = "http://rzipas.win:8170/api/";
-        User user;
+        User loggedInUser;
+        User currentlySelectedUser;
+        Chat currentChat;
+        bool currentChatCreated = false;
+
+        List<Chat> allChats;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -38,13 +44,21 @@ namespace ChatClient
         {
             Login login = new Login();
             bool? success = login.ShowDialog();
-            user = login.user;
-
+            loggedInUser = login.user;
+            
             if (success.HasValue && success.Value)
             {
+                loggedInUserName.Text = loggedInUser.username;
+
+                if (loggedInUser.picture == null)
+                {
+                    loggedInUser.image = ToBitmapImage(Properties.Resources.Image1);
+                }
+                loggedInUserImage.Source = loggedInUser.image;
+
                 var client = new RestClient(restURL + "user/getContacts");
                 RestRequest request = new RestRequest();
-                request.AddParameter("id", user.id);
+                request.AddParameter("id", loggedInUser.id);
 
                 var response = client.Execute<List<User>>(request);
                 List<User> users = response.Data;
@@ -64,6 +78,13 @@ namespace ChatClient
                     }
                     userList.ItemsSource = users;
                 }
+
+                client = new RestClient(restURL + "chat/getAllChats");
+                request = new RestRequest();
+                request.AddParameter("id", loggedInUser.id);
+
+                var allChatsResponse = client.Execute<List<Chat>>(request);
+                allChats = allChatsResponse.Data;
             }
             else
             {
@@ -91,17 +112,114 @@ namespace ChatClient
 
         private void userListSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            chatList.Items.Clear();
+
+            // show user data on top
+            currentlySelectedUser = (User)userList.SelectedItem;
+            username.Text = currentlySelectedUser.username;
+            userImage.Source = currentlySelectedUser.image;
+            userstatus.Text = currentlySelectedUser.status;
+
+
             // TODO show chat if already exists
-            User user = (User)userList.SelectedItem;
-            username.Text = user.username;
-            userImage.Source = user.image;
-            userstatus.Text = user.status;
+            // find chat
+            var client = new RestClient(restURL + "chat/getChat");
+            RestRequest request = new RestRequest();
+            request.AddParameter("userIdOne", currentlySelectedUser.id);
+            request.AddParameter("userIdTwo", loggedInUser.id);
+            var response1 = client.Execute<Chat>(request);
+            currentChat = response1.Data;
+            
+            if (currentChat == null)
+            {
+                currentChatCreated = false;
+                return;
+            }
+
+            currentChatCreated = true;
+
+            // get chat messages
+            client = new RestClient(restURL + "chat/getChatMessages");
+            request = new RestRequest();
+            request.AddParameter("chatId", currentChat.id);
+            var response2 = client.Execute<List<ChatMessage>>(request);
+            List<ChatMessage> messages = response2.Data;
+
+            // insert chat messages
+            foreach (ChatMessage msg in messages)
+            {
+                User currentUser;
+                if(msg.senderId == currentlySelectedUser.id)
+                {
+                    currentUser = currentlySelectedUser;
+                }
+                else
+                {
+                    currentUser = loggedInUser;
+                }
+                chatList.Items.Add(currentUser.username + ": " + msg.message);
+            }
         }
         
         private void onKeyDownChat(object sender, KeyEventArgs e)
         {
+            if(userList.SelectedItem == null)
+            {
+                return;
+            }
+
             // check if enter pressed if yes send message
-            // also check if chat between the two users has been created yet
+            if(e.Key == Key.Enter)
+            {
+                // check if chat between the two users has been created yet, if not, create
+                if(currentChatCreated == false)
+                {
+                    TwoPersonChat tpc = new TwoPersonChat();
+                    tpc.host = loggedInUser.id;
+                    tpc.member = currentlySelectedUser.id;
+                    tpc.title = "Chat between " + loggedInUser.username + " and " + currentlySelectedUser.username;
+
+                    // create chat
+                    string bodyC = "{ \"title\":\"" + tpc.title + "\",\"host\":\"" + tpc.host + "\" , \"member\":\"" + tpc.member + "\"}";
+
+                    var clientC = new RestClient(restURL);
+                    var requestC = new RestRequest("/chat/createNewChat/", Method.POST);
+
+                    requestC.AddHeader("Accept", "application/json");
+                    requestC.Parameters.Clear();
+                    requestC.AddParameter("application/json", bodyC, ParameterType.RequestBody);
+
+                    var responseC = clientC.Execute<Chat>(requestC);
+                    currentChat = responseC.Data;
+                }
+
+                TextBox textBox = (TextBox)sender;
+                string message = textBox.Text;
+                chatList.Items.Add(loggedInUser.username + ": " + message);
+
+                ChatMessage cm = new ChatMessage();
+                cm.chatId = currentChat.id;
+                cm.message = message;
+                cm.senderId = loggedInUser.id;
+                cm.timestamp = DateTime.UtcNow;
+
+                // save message
+                string body = "{ \"chatId\":\"" + cm.chatId + "\" , \"message\":\"" + cm.message + "\", \"senderId\":\"" 
+                    + cm.senderId + "\" , \"timestamp\":\"" + cm.timestamp + "\"}";
+
+                var client = new RestClient(restURL);
+                var request = new RestRequest("/chat/saveMessage/", Method.POST);
+
+                request.AddHeader("Accept", "application/json");
+                request.Parameters.Clear();
+                request.AddParameter("application/json", body, ParameterType.RequestBody);
+
+                var response = client.Execute<Chat>(request);
+                currentChat = response.Data;
+
+                // empty textbox
+                textBox.Text = "";
+            }
         }
     }
 }

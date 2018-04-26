@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace Model
 {
-    public class ChatMember
+    public class ChatMessage
     {
-        public int isAdmin { get; set; }
-        public int id { get; set; }
         public int chatId { get; set; }
-        public int userId { get; set; }
+        public string message { get; set; }
+        public int senderId { get; set; }
+        public DateTime timestamp { get; set; }
     }
 }

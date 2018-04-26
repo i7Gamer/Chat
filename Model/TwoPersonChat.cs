@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace Model
 {
-    public class Chat
+    public class TwoPersonChat
     {
-        public int id { get; set; }
         public string title { get; set; }
+        public int host { get; set; }
+        public int member { get; set; }
     }
 }

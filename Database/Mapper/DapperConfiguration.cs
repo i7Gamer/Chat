@@ -21,6 +21,7 @@ namespace Database
             {
                 config.AddMap(new UserMapper());
                 config.AddMap(new ChatMapper());
+                config.AddMap(new ChatMessageMapper());
                 config.AddMap(new ChatMemberMapper());
             });
         }

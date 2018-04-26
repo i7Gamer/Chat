@@ -15,6 +15,7 @@ namespace Database
             Map(x => x.id).ToColumn("chat_member_id");
             Map(x => x.chatId).ToColumn("chat_member_chat_id");
             Map(x => x.userId).ToColumn("chat_member_user_id");
+            Map(x => x.isAdmin).ToColumn("chat_member_user_is_admin");
         }
     }
 }

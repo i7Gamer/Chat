@@ -116,9 +116,9 @@ namespace Webservice.Controllers
                 {
                     loggedInUser = userRepository.login(connection, user.username, user.password);
                 }
-                catch
+                catch (Exception e)
                 {
-                    return BadRequest();
+                    return BadRequest(e.ToString());
                 }
 
                 if (loggedInUser == null)
